@@ -5,6 +5,8 @@ import org.apache.jena.ontology.OntModelSpec;
 import org.apache.jena.query.*;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.NodeIterator;
+import org.apache.jena.rdf.model.RDFNode;
 
 import java.io.*;
 
@@ -13,7 +15,9 @@ import java.io.*;
  * and return a resultset based on a SPARQL command that has been passed in.
  */
 public class Main {
-
+    // This is the default Ontology Model Specification, which does no reasoning
+    // TODO: add capability to run additional models
+    public static OntModelSpec modelSpec = OntModelSpec.OWL_MEM;
     public static void main(String[] args) {
         // Some classes to help us
         CommandLineParser clp = new GnuParser();
@@ -47,13 +51,13 @@ public class Main {
 
         // Help
         if (cl.hasOption("h")) {
-            helpf.printHelp("fims ", options, true);
+            helpf.printHelp("java -jar query-fetcher.jar ", options, true);
             return;
         }
 
         // No options returns help message
         if (cl.getOptions().length < 1) {
-            helpf.printHelp("fims ", options, true);
+            helpf.printHelp("java -jar query-fetcher.jar ", options, true);
             return;
         }
 
@@ -68,6 +72,7 @@ public class Main {
             File inputFileFile = new File(inputFile);
             filename = inputFileFile.getName();
         }
+
 
         // if the sparql option is specified then we are going to go ahead and just run the query and return
         // results.  No configuration file is necessary
@@ -108,20 +113,25 @@ public class Main {
         String queryString = sb.toString();
 
         // Create model
-        Model model = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM_MICRO_RULE_INF, null);
+        // No results
+        Model model = ModelFactory.createOntologyModel(modelSpec, null);
+        // SLOW but works
+        //Model model = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM_MICRO_RULE_INF, null);
         model.read(in, null);
         in.close();
+
 
         // Run query
         Query query = QueryFactory.create(queryString);
         QueryExecution qe = QueryExecutionFactory.create(query, model);
         ResultSet results = qe.execSelect();
+        //ResultSetFormatter.outputAsCSV(results);
         ResultSetFormatter.outputAsCSV(fop, results);
         //ResultSetFormatter.out(System.out, results);
 
         // Close up
         fop.close();
         qe.close();
-
+          
     }
 }
