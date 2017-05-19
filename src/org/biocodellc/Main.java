@@ -18,6 +18,8 @@ public class Main {
     // This is the default Ontology Model Specification, which does no reasoning
     // TODO: add capability to run additional models
     public static OntModelSpec modelSpec = OntModelSpec.OWL_MEM;
+    public static String inputFormat = "RDF/XML";
+
     public static void main(String[] args) {
         // Some classes to help us
         CommandLineParser clp = new GnuParser();
@@ -35,8 +37,12 @@ public class Main {
         Options options = new Options();
         options.addOption("h", "help", false, "print this help message and exit");
         options.addOption("o", "outputDirectory", true, "Output Directory");
-        options.addOption("i", "inputFile", true, "Input Spreadsheet");
-        options.addOption("sparql", true, "designate a sparql input file for processing.  This option should have an inputFile and outputDirectory specified.  The output format is always CSV");
+        options.addOption("i", "inputFile", true, "Input Spreadsheet or CSV file");
+        options.addOption("sparql", true, "designate a sparql input file for processing.  " +
+                "This option should have an inputFile and outputDirectory specified.  " +
+                "The output format is always CSV");
+        options.addOption("inputFormat", true, "Available input formats: " +
+                "RDF/XML, N-TRIPLE, TURTLE (or TTL) and N3.  Default is RDF/XML");
 
         // Create the commands parser and parse the command line arguments.
         try {
@@ -71,6 +77,9 @@ public class Main {
             inputFile = cl.getOptionValue("i");
             File inputFileFile = new File(inputFile);
             filename = inputFileFile.getName();
+        }
+        if (cl.hasOption("inputFormat")) {
+            inputFormat = cl.getOptionValue("inputFormat");
         }
 
 
@@ -113,11 +122,13 @@ public class Main {
         String queryString = sb.toString();
 
         // Create model
-        // No results
+        // No results       
         Model model = ModelFactory.createOntologyModel(modelSpec, null);
         // SLOW but works
         //Model model = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM_MICRO_RULE_INF, null);
-        model.read(in, null);
+        model.read(in, null, inputFormat);
+
+//        model.read(in, null);
         in.close();
 
 
@@ -132,6 +143,6 @@ public class Main {
         // Close up
         fop.close();
         qe.close();
-          
+
     }
 }
