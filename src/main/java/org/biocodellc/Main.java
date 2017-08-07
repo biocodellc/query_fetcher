@@ -1,14 +1,6 @@
 package org.biocodellc;
 
 import org.apache.commons.cli.*;
-import org.apache.jena.ontology.OntModelSpec;
-import org.apache.jena.query.*;
-import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.ModelFactory;
-import org.apache.jena.rdf.model.NodeIterator;
-import org.apache.jena.rdf.model.RDFNode;
-
-import java.io.*;
 
 /**
  * A very simple class to take an input OWL file, run a SPARQL query over this data,
@@ -16,8 +8,6 @@ import java.io.*;
  */
 public class Main {
     // This is the default Ontology Model Specification, which does no reasoning
-    // TODO: add capability to run additional models
-    public static OntModelSpec modelSpec = OntModelSpec.OWL_MEM;
     public static String inputFormat = "RDF/XML";
 
     public static void main(String[] args) {
@@ -27,7 +17,7 @@ public class Main {
         CommandLine cl;
 
         // The input file
-        String inputFile = "";
+        String inputData = "";
         String filename = "";
 
         String outputDirectory = "";
@@ -37,9 +27,9 @@ public class Main {
         Options options = new Options();
         options.addOption("h", "help", false, "print this help message and exit");
         options.addOption("o", "outputDirectory", true, "Output Directory");
-        options.addOption("i", "inputFile", true, "Input Spreadsheet or CSV file");
+        options.addOption("i", "inputData", true, "Input rdf file or directory of input files");
         options.addOption("sparql", true, "designate a sparql input file for processing.  " +
-                "This option should have an inputFile and outputDirectory specified.  " +
+                "This option should have an inputData and outputDirectory specified.  " +
                 "The output format is always CSV");
         options.addOption("inputFormat", true, "Available input formats: " +
                 "RDF/XML, N-TRIPLE, TURTLE (or TTL) and N3.  Default is RDF/XML");
@@ -74,9 +64,7 @@ public class Main {
 
 
         if (cl.hasOption("i")) {
-            inputFile = cl.getOptionValue("i");
-            File inputFileFile = new File(inputFile);
-            filename = inputFileFile.getName();
+            inputData = cl.getOptionValue("i");
         }
         if (cl.hasOption("inputFormat")) {
             inputFormat = cl.getOptionValue("inputFormat");
@@ -87,62 +75,14 @@ public class Main {
         // results.  No configuration file is necessary
         if (cl.hasOption("sparql")) {
 
-            String outputFile = outputDirectory + filename + ".csv";
             try {
-                runQuery(inputFile, outputFile, cl.getOptionValue("sparql"));
+                RDF2CSV converter = new RDF2CSV(inputData, outputDirectory, cl.getOptionValue("sparql"), inputFormat);
+                converter.convert();
             } catch (Exception e) {
                 System.err.println(e.getMessage());
             }
-            System.out.println("    writing " + outputFile);
-            return;
         }
     }
 
-    /*
-        Simple method to run a query without involving entailments of the FIMSQueryBuilder
-         */
-    private static void runQuery(String inputFile, String outputFile, String sparqlFile) throws Exception {
-        // Create an input Stream to read input File
-        InputStream in = new FileInputStream(new File(inputFile));
 
-        // Create a file output stream to store file output
-        File file = new File(outputFile);
-        FileOutputStream fop = new FileOutputStream(file);
-
-        // Read sparqlFile into String
-        InputStream is = new FileInputStream(sparqlFile);
-        BufferedReader buf = new BufferedReader(new InputStreamReader(is));
-        String line = buf.readLine();
-        StringBuilder sb = new StringBuilder();
-        while (line != null) {
-            sb.append(line).append("\n");
-            line = buf.readLine();
-        }
-        is.close();
-        String queryString = sb.toString();
-
-        // Create model
-        // No results       
-        Model model = ModelFactory.createOntologyModel(modelSpec, null);
-        // SLOW but works
-        //Model model = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM_MICRO_RULE_INF, null);
-        model.read(in, null, inputFormat);
-
-//        model.read(in, null);
-        in.close();
-
-
-        // Run query
-        Query query = QueryFactory.create(queryString);
-        QueryExecution qe = QueryExecutionFactory.create(query, model);
-        ResultSet results = qe.execSelect();
-        //ResultSetFormatter.outputAsCSV(results);
-        ResultSetFormatter.outputAsCSV(fop, results);
-        //ResultSetFormatter.out(System.out, results);
-
-        // Close up
-        fop.close();
-        qe.close();
-
-    }
 }
