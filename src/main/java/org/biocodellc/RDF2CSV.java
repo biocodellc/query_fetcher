@@ -1,5 +1,6 @@
 package org.biocodellc;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.jena.ontology.OntModelSpec;
 import org.apache.jena.query.*;
 import org.apache.jena.rdf.model.Model;
@@ -36,7 +37,18 @@ public class RDF2CSV {
 
         if (input.isDirectory()) {
             for (File f : input.listFiles()) {
-                this.runQuery(f.getCanonicalPath(), this.getOutputFile(f.getCanonicalPath()));
+                switch (FilenameUtils.getExtension(f.getName()).toLowerCase()) {
+                    case "ttl":
+                    case "turtle":
+                    case "n3":
+                    case "nt":
+                    case "rdf":
+                        this.runQuery(f.getCanonicalPath(), this.getOutputFile(f.getCanonicalPath()));
+                        break;
+                    default:
+                        System.out.println("skipping unknown file type " + f.getName());
+
+                }
             }
         } else {
             this.runQuery(inputData, this.getOutputFile(inputData));
