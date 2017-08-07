@@ -10,6 +10,7 @@ import java.io.*;
 import java.nio.file.Paths;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author rjewing
@@ -40,7 +41,7 @@ public class RDF2CSV {
         }
 
         if (input.isDirectory()) {
-            ExecutorService survice = Executors.newFixedThreadPool(threads);
+            ExecutorService service = Executors.newFixedThreadPool(threads);
             for (File f : input.listFiles()) {
                 switch (FilenameUtils.getExtension(f.getName()).toLowerCase()) {
                     case "ttl":
@@ -48,7 +49,7 @@ public class RDF2CSV {
                     case "n3":
                     case "nt":
                     case "rdf":
-                        survice.submit(() -> {
+                        service.submit(() -> {
                             try {
                                 this.runQuery(f.getAbsolutePath(), this.getOutputFile(f.getAbsolutePath()));
                             } catch (IOException e) {
@@ -62,6 +63,8 @@ public class RDF2CSV {
 
                 }
             }
+            service.shutdown();
+            service.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
         } else {
             this.runQuery(inputData, this.getOutputFile(inputData));
         }
