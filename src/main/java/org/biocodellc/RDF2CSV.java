@@ -8,6 +8,8 @@ import org.apache.jena.rdf.model.ModelFactory;
 
 import java.io.*;
 import java.nio.file.Paths;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * @author rjewing
@@ -18,14 +20,16 @@ public class RDF2CSV {
 
     private final String sparql;
     private final String inputFormat;
+    private final int threads;
     private final String inputData;
     private final String outputDir;
 
-    public RDF2CSV(String inputData, String outputDir, String sparqlFile, String inputFormat) throws IOException {
+    public RDF2CSV(String inputData, String outputDir, String sparqlFile, String inputFormat, int threads) throws IOException {
         this.inputData = inputData;
         this.outputDir = outputDir;
         this.sparql = this.readSparqlFile(sparqlFile);
         this.inputFormat = inputFormat;
+        this.threads = threads;
     }
 
     public void convert() throws Exception {
@@ -36,6 +40,7 @@ public class RDF2CSV {
         }
 
         if (input.isDirectory()) {
+            ExecutorService survice = Executors.newFixedThreadPool(threads);
             for (File f : input.listFiles()) {
                 switch (FilenameUtils.getExtension(f.getName()).toLowerCase()) {
                     case "ttl":
@@ -43,7 +48,14 @@ public class RDF2CSV {
                     case "n3":
                     case "nt":
                     case "rdf":
-                        this.runQuery(f.getCanonicalPath(), this.getOutputFile(f.getCanonicalPath()));
+                        survice.submit(() -> {
+                            try {
+                                this.runQuery(f.getAbsolutePath(), this.getOutputFile(f.getAbsolutePath()));
+                            } catch (IOException e) {
+                                System.err.println("ERROR converting " + f.getName());
+                                e.printStackTrace();
+                            }
+                        });
                         break;
                     default:
                         System.out.println("skipping unknown file type " + f.getName());

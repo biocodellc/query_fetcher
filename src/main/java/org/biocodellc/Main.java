@@ -16,10 +16,8 @@ public class Main {
         HelpFormatter helpf = new HelpFormatter();
         CommandLine cl;
 
-        // The input file
         String inputData = "";
-        String filename = "";
-
+        int numThreads = 0;
         String outputDirectory = "";
 
 
@@ -28,6 +26,7 @@ public class Main {
         options.addOption("h", "help", false, "print this help message and exit");
         options.addOption("o", "outputDirectory", true, "Output Directory");
         options.addOption("i", "inputData", true, "Input rdf file or directory of input files");
+        options.addOption("numThreads", true, "The number of threads to use if inputData is a directory");
         options.addOption("sparql", true, "designate a sparql input file for processing.  " +
                 "This option should have an inputData and outputDirectory specified.  " +
                 "The output format is always CSV");
@@ -70,13 +69,17 @@ public class Main {
             inputFormat = cl.getOptionValue("inputFormat");
         }
 
+        if (cl.hasOption("numThreads")) {
+            numThreads = Integer.parseInt(cl.getOptionValue("numThreads"));
+        }
+
 
         // if the sparql option is specified then we are going to go ahead and just run the query and return
         // results.  No configuration file is necessary
         if (cl.hasOption("sparql")) {
 
             try {
-                RDF2CSV converter = new RDF2CSV(inputData, outputDirectory, cl.getOptionValue("sparql"), inputFormat);
+                RDF2CSV converter = new RDF2CSV(inputData, outputDirectory, cl.getOptionValue("sparql"), inputFormat, numThreads);
                 converter.convert();
             } catch (Exception e) {
                 System.err.println(e.getMessage());
