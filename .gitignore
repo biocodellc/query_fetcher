@@ -2,6 +2,7 @@
 *.iml
 
 *.properties
+!gradle/wrapper/gradle-wrapper.properties
 build/
 out/
 .gradle/
