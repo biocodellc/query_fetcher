@@ -17,7 +17,7 @@ public class Main {
         CommandLine cl;
 
         String inputData = "";
-        int numThreads = 0;
+        int numThreads = 1;
         String outputDirectory = "";
 
 
