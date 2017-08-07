@@ -4,6 +4,11 @@ plugins {
 
 apply plugin: 'java'
 apply plugin: "application"
+apply plugin: 'maven-publish'
+
+project.ext {
+    VERSION = '0.0.1'
+}
 
 repositories {
     maven {
@@ -22,16 +27,43 @@ dependencies {
 }
 
 mainClassName = 'org.biocodellc.Main'
-//jar {
-//    manifest {
-//        attributes 'Main-Class': 'org.biocodellc.Main'
-//    }
-//}
+
+// gradle run -PappArgs="['arg1', 'args2']"
+run {
+    if (project.hasProperty("appArgs")) {
+        args Eval.me(appArgs)
+    }
+}
+
+runShadow {
+    if (project.hasProperty("appArgs")) {
+        args Eval.me(appArgs)
+    }
+}
 
 shadowJar {
     baseName = "query_fetcher"
+    classifier = null
+    version = VERSION
 
-//    manifest {
-//        attributes "Main-Class": "org.biocodellc.Main"
-//    }
+    mergeServiceFiles()
+}
+
+publishing {
+    repositories {
+        maven {
+            url "http://repo.biocodellc.com/repository/maven-public"
+            credentials {
+                username = mavenUser
+                password = mavenPass
+            }
+        }
+    }
+    publications {
+        shadow(MavenPublication) {
+            from components.shadow
+            groupId 'org.biocode'
+            version VERSION
+        }
+    }
 }
