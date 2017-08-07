@@ -1,0 +1,37 @@
+plugins {
+    id 'com.github.johnrengelman.shadow' version '1.2.4'
+}
+
+apply plugin: 'java'
+apply plugin: "application"
+
+repositories {
+    maven {
+        url "http://repo.biocodellc.com/repository/3rd-party/"
+        credentials {
+            username mavenUser
+            password mavenPass
+        }
+    }
+    jcenter()
+}
+
+dependencies {
+    compile group: 'commons-cli', name: 'commons-cli', version: '1.4'
+    compile group: 'org.apache.jena', name: 'jena-tdb', version: '3.4.0'
+}
+
+mainClassName = 'org.biocodellc.Main'
+//jar {
+//    manifest {
+//        attributes 'Main-Class': 'org.biocodellc.Main'
+//    }
+//}
+
+shadowJar {
+    baseName = "query_fetcher"
+
+//    manifest {
+//        attributes "Main-Class": "org.biocodellc.Main"
+//    }
+}
