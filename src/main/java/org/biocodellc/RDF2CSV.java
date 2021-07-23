@@ -27,7 +27,7 @@ public class RDF2CSV {
 
     public RDF2CSV(String inputData, String outputDir, String sparqlFile, String inputFormat, int threads) throws IOException {
         this.inputData = inputData;
-        this.outputDir = outputDir;
+        this.outputDir = outputDir + "/";
         this.sparql = this.readSparqlFile(sparqlFile);
         this.inputFormat = inputFormat;
         this.threads = threads;
