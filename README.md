@@ -1,4 +1,4 @@
-# query-fetcher
+# query_fetcher
 
 A lightweight SPARQL interface which enables query against an input File (imports are allowed)
 using a text file containing SPARQL syntax, and outputs a CSV format file.  The query itself
