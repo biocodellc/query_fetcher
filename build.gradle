@@ -1,69 +1,24 @@
-plugins {
-    id 'com.github.johnrengelman.shadow' version '1.2.4'
-}
-
 apply plugin: 'java'
 apply plugin: "application"
-apply plugin: 'maven-publish'
 
 project.ext {
     VERSION = '0.0.1'
 }
 
-repositories {
-    maven {
-        url "http://repo.biocodellc.com/repository/3rd-party/"
-        credentials {
-            username mavenUser
-            password mavenPass
-        }
-    }
-    jcenter()
+repositories { 
+    mavenCentral() 
 }
 
 dependencies {
-    compile group: 'commons-cli', name: 'commons-cli', version: '1.4'
-    compile group: 'org.apache.jena', name: 'jena-tdb', version: '3.4.0'
+    implementation group: 'commons-cli', name: 'commons-cli', version: '1.4'
+    implementation group: 'org.apache.jena', name: 'jena-tdb', version: '3.4.0'
 }
 
 mainClassName = 'org.biocodellc.Main'
 
-// gradle run -PappArgs="['arg1', 'args2']"
 run {
     if (project.hasProperty("appArgs")) {
         args Eval.me(appArgs)
     }
 }
 
-runShadow {
-    if (project.hasProperty("appArgs")) {
-        args Eval.me(appArgs)
-    }
-}
-
-shadowJar {
-    baseName = "query_fetcher"
-    classifier = null
-    version = VERSION
-
-    mergeServiceFiles()
-}
-
-publishing {
-    repositories {
-        maven {
-            url "http://repo.biocodellc.com/repository/maven-public"
-            credentials {
-                username = mavenUser
-                password = mavenPass
-            }
-        }
-    }
-    publications {
-        shadow(MavenPublication) {
-            from components.shadow
-            groupId 'org.biocode'
-            version VERSION
-        }
-    }
-}
