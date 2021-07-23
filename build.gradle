@@ -1,5 +1,10 @@
+plugins {
+    id 'com.github.johnrengelman.shadow' version '7.0.0'
+}
+
 apply plugin: 'java'
 apply plugin: "application"
+apply plugin: 'maven-publish'
 
 project.ext {
     VERSION = '0.0.1'
@@ -16,9 +21,24 @@ dependencies {
 
 mainClassName = 'org.biocodellc.Main'
 
+// gradle run -PappArgs="['arg1', 'args2']"
 run {
     if (project.hasProperty("appArgs")) {
         args Eval.me(appArgs)
     }
+}
+
+runShadow {
+    if (project.hasProperty("appArgs")) {
+        args Eval.me(appArgs)
+    }
+}
+
+shadowJar {
+    baseName = "query_fetcher"
+    classifier = null
+    version = VERSION
+
+    mergeServiceFiles()
 }
 
