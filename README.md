@@ -1,3 +1,7 @@
+# DEPRECATED
+
+this repository is deprecated... please see [ROBOT](http://robot.obolibrary.org/) query module, which does everything this repository does.
+
 # query_fetcher
 
 A lightweight SPARQL interface which enables query against an input File (imports are allowed)
